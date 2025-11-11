@@ -10,13 +10,6 @@ export const dynamic = 'force-dynamic';   // disables SSG for this route
 // (do NOT export revalidate here)
 type PageProps = { params: { id: string } };
 
-export const revalidate = 600;
-
-export async function generateStaticParams() {
-  const { videos: vids } = await getVideos({ pageSize: 20 }); // prebuild first 20
-  return vids.map((v) => ({ id: v.id }));
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const v = await getVideoById(params.id);
   if (!v) return { title: "Video not found" };

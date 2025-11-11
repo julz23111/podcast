@@ -44,33 +44,54 @@ export default async function VideosPage({ searchParams }: Props) {
           <span className="font-semibold">The Weekly Bust</span>.
         </p>
       </div>
-
-      {/* Grid */}
-      <VideosList videos={videos} />
-
-      {/* Pager */}
-      <div className="flex items-center justify-between pt-4 border-t border-white/20">
-        <div>
-          {prevPageToken && (
-            <Link
-              className="text-sm underline text-white/90 hover:text-white"
-              href={`/videos?pageToken=${encodeURIComponent(prevPageToken)}`}
-            >
-              ← Previous
-            </Link>
-          )}
+  
+      {/* Content */}
+      {videos.length === 0 ? (
+        <div className="rounded-xl border border-white/15 bg-black/30 p-6 text-center backdrop-blur-sm">
+          <p className="text-white/90">
+            No videos to show right now. This can happen if YouTube quota is temporarily exceeded.
+          </p>
+          <a
+            className="mt-4 inline-flex items-center justify-center rounded-md border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20"
+            href="https://www.youtube.com/@theweeklybust"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Visit our YouTube channel
+          </a>
         </div>
-        <div>
-          {nextPageToken && (
-            <Link
-              className="text-sm underline text-white/90 hover:text-white"
-              href={`/videos?pageToken=${encodeURIComponent(nextPageToken)}`}
-            >
-              Next →
-            </Link>
+      ) : (
+        <>
+          {/* Grid */}
+          <VideosList videos={videos} />
+  
+          {/* Pager */}
+          {(prevPageToken || nextPageToken) && (
+            <div className="flex items-center justify-between pt-4 border-t border-white/20">
+              <div>
+                {prevPageToken && (
+                  <Link
+                    className="text-sm underline text-white/90 hover:text-white"
+                    href={`/videos?pageToken=${encodeURIComponent(prevPageToken)}`}
+                  >
+                    ← Previous
+                  </Link>
+                )}
+              </div>
+              <div>
+                {nextPageToken && (
+                  <Link
+                    className="text-sm underline text-white/90 hover:text-white"
+                    href={`/videos?pageToken=${encodeURIComponent(nextPageToken)}`}
+                  >
+                    Next →
+                  </Link>
+                )}
+              </div>
+            </div>
           )}
-        </div>
-      </div>
+        </>
+      )}
     </section>
   );
 }
