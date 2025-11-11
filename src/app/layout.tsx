@@ -7,7 +7,7 @@ import ThemeProvider from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "My Friend's Podcast",
+  title: "Weekly Bust Podcast",
   description: "Official website for the podcast — listen, read show notes, and subscribe.",
 };
 
