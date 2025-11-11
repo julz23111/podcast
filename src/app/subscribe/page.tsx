@@ -44,7 +44,7 @@ export default function SubscribePage() {
           </CardHeader>
           <CardContent>
             <a
-              href="https://open.spotify.com/search/My%20Friend%27s%20Podcast"
+              href="https://open.spotify.com/show/2UUupNQYOf46Jw9d2liFmL"
               target="_blank"
               rel="noreferrer"
             >
@@ -61,7 +61,7 @@ export default function SubscribePage() {
           </CardHeader>
           <CardContent>
             <a
-              href="https://podcasts.apple.com/search?term=My%20Friend%27s%20Podcast"
+              href="https://podcasts.apple.com/us/podcast/the-weekly-bust/id1493032393"
               target="_blank"
               rel="noreferrer"
             >
@@ -75,17 +75,17 @@ export default function SubscribePage() {
         <Card className="border border-white/20 bg-black/40 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-white">
-              Google Podcasts / YouTube Music
+              YouTube
             </CardTitle>
           </CardHeader>
           <CardContent>
             <a
-              href="https://music.youtube.com/search?q=My%20Friend%27s%20Podcast"
+              href="https://www.youtube.com/c/theweeklybust"
               target="_blank"
               rel="noreferrer"
             >
               <Button className="bg-white text-black hover:bg-white/90">
-                Find on YouTube Music
+                Find on YouTube 
               </Button>
             </a>
           </CardContent>

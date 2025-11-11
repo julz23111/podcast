@@ -82,7 +82,7 @@ export default function AboutPage() {
         <div className="grid gap-6 sm:grid-cols-2">
           <Card className="border border-gray-200 dark:border-gray-800">
             <CardHeader>
-              <CardTitle>Host Name</CardTitle>
+              <CardTitle>Levi</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-gray-700 dark:text-gray-300">
               Yo! What's up everyone? I'm Levi, your weekly bust host. I hope you
@@ -94,7 +94,7 @@ export default function AboutPage() {
 
           <Card className="border border-gray-200 dark:border-gray-800">
             <CardHeader>
-              <CardTitle>Co-Host Name</CardTitle>
+              <CardTitle>Ty</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-gray-700 dark:text-gray-300">
               It's the Bust World Baby! Like, comment and subscribe!
