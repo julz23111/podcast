@@ -5,7 +5,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import ShareBar from "@/components/share-bar";
 import { Badge } from "@/components/ui/badge";
-
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';   // disables SSG for this route
+// (do NOT export revalidate here)
 type PageProps = { params: { id: string } };
 
 export const revalidate = 600;

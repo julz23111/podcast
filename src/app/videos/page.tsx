@@ -5,8 +5,7 @@ import Link from "next/link";
 import VideosList from "@/components/videos-list";
 
 export const runtime = 'edge';
-
-export const revalidate = 600;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "Videos | The Weekly Bust",
