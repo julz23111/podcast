@@ -4,6 +4,8 @@ import { getVideos } from "@/lib/youtube";
 import Link from "next/link";
 import VideosList from "@/components/videos-list";
 
+export const runtime = 'edge';
+
 export const revalidate = 600;
 
 export const metadata: Metadata = {

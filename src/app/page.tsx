@@ -5,7 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { getVideos, getLiveVideo } from "@/lib/youtube";
 import { headers } from "next/headers";
 
-export const revalidate = 600; // cache homepage for 10 minutes
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 
 function stripHtml(html: string) {
   return (html || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
@@ -22,7 +24,8 @@ export default async function HomePage() {
     getEpisodes(),
   ]);
   const latestVideo = vids[0];
-  const embedDomain = ((await headers()).get("host") || "").split(":")[0] || "localhost";
+  const resolvedHeaders = await headers();
+  const embedDomain = (resolvedHeaders.get("host") || "").split(":")[0] || "localhost";
 
   const gridVideos = live
     ? vids.filter((v) => v.id !== live.id).slice(0, 6)
