@@ -1,0 +1,5 @@
+# wrangler.toml
+name = "podcast"
+main = ".vercel/output/functions/[[path]].func/index.mjs"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
