@@ -1,103 +1,302 @@
-import Image from "next/image";
+import Link from "next/link";
+import { getEpisodes } from "@/lib/rss";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { getVideos, getLiveVideo } from "@/lib/youtube";
+import { headers } from "next/headers";
 
-export default function Home() {
+export const revalidate = 600; // cache homepage for 10 minutes
+
+function stripHtml(html: string) {
+  return (html || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+function excerpt(text: string, max = 120) {
+  const t = stripHtml(text);
+  return t.length <= max ? t : t.slice(0, max).trimEnd() + "…";
+}
+
+export default async function HomePage() {
+  const [live, { videos: vids }, episodes] = await Promise.all([
+    getLiveVideo(),
+    getVideos({ pageSize: 8 }),
+    getEpisodes(),
+  ]);
+  const latestVideo = vids[0];
+  const embedDomain = ((await headers()).get("host") || "").split(":")[0] || "localhost";
+
+  const gridVideos = live
+    ? vids.filter((v) => v.id !== live.id).slice(0, 6)
+    : vids.slice(1, 7);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <section className="space-y-10">
+      {/* Hero: live (if present) else latest video */}
+      <div className="grid gap-6 lg:grid-cols-5">
+        <div className="lg:col-span-3 space-y-4">
+          {/* Enhanced contrast header */}
+          <div className="relative isolate max-w-2xl rounded-xl bg-black/45 p-4 backdrop-blur-sm ring-1 ring-white/10 shadow-lg">
+            <h1 className="text-3xl font-bold text-white drop-shadow-md heading-tape">
+              The Weekly Bust
+            </h1>
+            <p className="mt-2 text-white/90 drop-shadow">
+              Fresh takes, creator stories, and business breakdowns. Watch the
+              latest live or dive into the podcast.
+            </p>
+          </div>
+          {live && (
+            <div className="mb-8">
+              <div className="grid gap-4 lg:grid-cols-3">
+                {/* Video player (2/3 width on large screens) */}
+                <div className="lg:col-span-2">
+                  <div
+                    className="relative w-full overflow-hidden rounded-lg border border-white/20 shadow-lg"
+                    style={{ paddingTop: "56.25%" }}
+                  >
+                    <iframe
+                      src={`https://www.youtube.com/embed/${live.id}`}
+                      className="absolute left-0 top-0 h-full w-full"
+                      title={live.title}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  </div>
+                  <div className="mt-3">
+                    <h2 className="text-xl font-semibold text-white drop-shadow-md">
+                      🔴 Live Now — {live.title}
+                    </h2>
+                    <p className="text-sm text-white/80 drop-shadow">
+                      Streaming on{" "}
+                      <a
+                        href={`https://www.youtube.com/watch?v=${live.id}`}
+                        target="_blank"
+                        className="underline"
+                      >
+                        YouTube
+                      </a>
+                    </p>
+                  </div>
+                </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+                {/* Live chat (desktop) */}
+                <div className="hidden lg:block rounded-lg border border-white/20 shadow-lg bg-black/40 backdrop-blur-sm">
+                  <div className="relative h-[560px] w-full overflow-hidden rounded-lg">
+                    <iframe
+                      src={`https://www.youtube.com/live_chat?v=${live.id}&amp;embed_domain=${embedDomain}`}
+                      className="h-full w-full"
+                      title="YouTube Live Chat"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  </div>
+                  <div className="px-3 pb-3">
+                    <a
+                      href={`https://www.youtube.com/live_chat?v=${live.id}&amp;is_popout=1`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm underline text-white/90 hover:text-white"
+                    >
+                      Pop out chat ↗
+                    </a>
+                  </div>
+                </div>
+                {/* Live chat (mobile collapsible) */}
+                <div className="lg:hidden">
+                  <details className="rounded-lg border border-white/20 shadow-lg bg-black/40 backdrop-blur-sm open:pb-3">
+                    <summary className="cursor-pointer select-none px-3 py-2 text-white/90">
+                      Live chat
+                    </summary>
+                    <div className="relative h-[480px] w-full overflow-hidden rounded-lg">
+                      <iframe
+                        src={`https://www.youtube.com/live_chat?v=${live.id}&amp;embed_domain=${embedDomain}`}
+                        className="h-full w-full"
+                        title="YouTube Live Chat"
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                      />
+                    </div>
+                    <div className="px-3 pt-2">
+                      <a
+                        href={`https://www.youtube.com/live_chat?v=${live.id}&amp;is_popout=1`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm underline text-white/90 hover:text-white"
+                      >
+                        Pop out chat ↗
+                      </a>
+                    </div>
+                  </details>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!live && latestVideo && (
+            <div>
+              <div
+                className="relative w-full overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800"
+                style={{ paddingTop: "56.25%" }}
+              >
+                <iframe
+                  src={`https://www.youtube.com/embed/${latestVideo.id}`}
+                  className="absolute left-0 top-0 h-full w-full"
+                  title={latestVideo.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+              <div className="mt-3">
+              <h2 className="text-xl font-semibold text-white drop-shadow-md">
+                {latestVideo.title}
+              </h2>
+              <div className="text-sm text-white/90 drop-shadow">
+                {latestVideo.publishedAt
+                  ? new Date(latestVideo.publishedAt).toLocaleDateString()
+                  : "—"}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {/* Quick links / CTAs */}
+        <aside className="lg:col-span-2 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Subscribe</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <p className="text-gray-700 dark:text-gray-300">
+                Get new episodes on your favorite platform.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <a className="underline" href="/subscribe">All links</a>
+                <a
+                  className="underline"
+                  href="https://www.youtube.com/@theweeklybust"
+                  target="_blank"
+                >
+                  YouTube
+                </a>
+                {/* add Apple/Spotify links when you have them */}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>About the show</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm text-gray-700 dark:text-gray-300">
+              Creator economy, tech, and real talk. Learn more{" "}
+              <Link className="underline" href="/about">
+                about us
+              </Link>
+              .
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
+
+      {/* Recent Episodes */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold text-white drop-shadow-md">
+            Recent Episodes
+          </h2>
+          <Link href="/episodes" className="text-sm underline text-white/90">
+            View all
+          </Link>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {episodes.slice(0, 6).map((ep) => (
+            <Card
+              key={ep.id}
+              className="group overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
+            >
+              {ep.image && (
+                <div className="relative">
+                  <img
+                    src={ep.image}
+                    alt={ep.title}
+                    className="w-full h-40 object-cover rounded-t-lg transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-t-lg" />
+                </div>
+              )}
+              <CardHeader>
+                <CardTitle className="text-base leading-snug">
+                  <Link
+                    href={`/episodes/${ep.slug}`}
+                    className="hover:underline"
+                  >
+                    {ep.title}
+                  </Link>
+                </CardTitle>
+                <Badge variant="secondary">
+                  {ep.publishedAt
+                    ? new Date(ep.publishedAt).toLocaleDateString()
+                    : "—"}
+                </Badge>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  {excerpt(ep.description, 100)}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      {/* Recent Videos */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-semibold text-white drop-shadow-md">
+            Recent Videos
+          </h2>
+          <Link href="/videos" className="text-sm underline text-white/90">
+            View all
+          </Link>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {gridVideos.map((v) => (
+            <Card
+              key={v.id}
+              className="group overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800 transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
+            >
+              {v.thumbnail && (
+                <div className="relative">
+                  <img
+                    src={v.thumbnail}
+                    alt={v.title}
+                    className="w-full h-40 object-cover rounded-t-lg transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent rounded-t-lg" />
+                </div>
+              )}
+              <CardHeader>
+                <CardTitle className="text-base leading-snug">
+                  <Link href={`/videos/${v.id}`} className="hover:underline">
+                    {v.title}
+                  </Link>
+                </CardTitle>
+                <Badge variant="secondary">
+                  {v.publishedAt
+                    ? new Date(v.publishedAt).toLocaleDateString()
+                    : "—"}
+                </Badge>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-3">
+                  {v.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
